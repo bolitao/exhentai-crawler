@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*
 
 import configparser
+import datetime
 import random
 import time
+import pymysql
 import requests
 from lxml import etree
 
@@ -31,6 +33,13 @@ headers = {
     "Referer": 'https://exhentai.org/'
 }
 
+mysql_host = config['MySQL'].get('host')
+mysql_user = config['MySQL'].get('user')
+mysql_password = config['MySQL'].get('password')
+mysql_dbname = config['MySQL'].get('dbname')
+mysql_connection = pymysql.connect(host=mysql_host, user=mysql_user, password=mysql_password, db=mysql_dbname,
+                                   charset='utf8mb4')
+
 
 def get_fav():
     base_url = 'https://exhentai.org/favorites.php'
@@ -48,8 +57,13 @@ def get_fav():
         links = html_etree.xpath('/html/body/div[2]/form/table[2]/tr/td[3]/a/@href')
         # TODO: data storage
         for i in range(len(titles)):
-            print(titles[i], links[i])
+            title = titles[i]
+            link = links[i]
+            cursor = mysql_connection.cursor()
+            cursor.execute("INSERT INTO favorites VALUES( null, %s, %s, null)", (title, link))
+            mysql_connection.commit()
         time.sleep(random.uniform(0.5, 1.0))
+    time.sleep(random.uniform(0.5, 1.0))
 
 
 def e2ex(e_link):
@@ -63,22 +77,33 @@ def get_top_list():
     html_etree = etree.HTML(resp)
     past_year_titles = html_etree.xpath('/html/body/div[2]/div[1]/div[2]/table/tr/td[2]/div/a/text()')
     past_year_links = html_etree.xpath('/html/body/div[2]/div[1]/div[2]/table/tr/td[2]/div/a/@href')
-    print("PastYearTopList:")
     for i in range(len(past_year_titles)):
-        print(past_year_titles[i], e2ex(past_year_links[i]))
+        cursor = mysql_connection.cursor()
+        cursor.execute("INSERT INTO toplist VALUES( null, %s, %s, null, %s, %s)", (
+            past_year_titles[i], e2ex(past_year_links[i]), datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'yearly'))
+        mysql_connection.commit()
     past_month_titles = html_etree.xpath('/html/body/div[2]/div[1]/div[3]/table/tr/td[2]/div/a/text()')
     past_month_links = html_etree.xpath('/html/body/div[2]/div[1]/div[3]/table/tr/td[2]/div/a/@href')
-    print("-----------------------------\nPastMonthTopList:")
     for i in range(len(past_month_titles)):
-        print(past_month_titles[i], e2ex(past_month_links[i]))
-    yesterday_data_titles = html_etree.xpath('/html/body/div[2]/div[1]/div[4]/table/tr/td[2]/div/a/text()')
-    yesterday_data_links = html_etree.xpath('/html/body/div[2]/div[1]/div[4]/table/tr/td[2]/div/a/@href')
-    print("-----------------------------\nYesterdayTopList:")
-    for i in range(len(yesterday_data_titles)):
-        print(past_year_titles[i], e2ex(yesterday_data_links[i]))
+        cursor = mysql_connection.cursor()
+        cursor.execute("INSERT INTO toplist VALUES( null, %s, %s, null, %s, %s)", (
+            past_month_titles[i], e2ex(past_month_links[i]), datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'yearly'))
+        mysql_connection.commit()
+    yesterday_titles = html_etree.xpath('/html/body/div[2]/div[1]/div[4]/table/tr/td[2]/div/a/text()')
+    yesterday_links = html_etree.xpath('/html/body/div[2]/div[1]/div[4]/table/tr/td[2]/div/a/@href')
+    for i in range(len(yesterday_titles)):
+        cursor = mysql_connection.cursor()
+        cursor.execute("INSERT INTO toplist VALUES( null, %s, %s, null, %s, %s)", (
+            yesterday_titles[i], e2ex(yesterday_links[i]), datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'yearly'))
+        mysql_connection.commit()
+    time.sleep(random.uniform(0.1, 0.3))
 
 
 # # TODO: use official API
 if __name__ == '__main__':
     get_top_list()
-    get_fav()
+    get_fav()  # 仅用作 telegram bot 的话记得注释掉
+    mysql_connection.close()
