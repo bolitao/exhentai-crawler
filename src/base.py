@@ -62,7 +62,7 @@ def get_fav():
             cursor = mysql_connection.cursor()
             cursor.execute("INSERT INTO favorites VALUES( null, %s, %s, null)", (title, link))
             mysql_connection.commit()
-        time.sleep(random.uniform(0.5, 1.0))
+        time.sleep(random.uniform(0.3, 0.5))
     time.sleep(random.uniform(0.5, 1.0))
 
 
@@ -89,7 +89,7 @@ def get_top_list():
         cursor = mysql_connection.cursor()
         cursor.execute("INSERT INTO toplist VALUES( null, %s, %s, null, %s, %s)", (
             past_month_titles[i], e2ex(past_month_links[i]), datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            'yearly'))
+            'monthly'))
         mysql_connection.commit()
     yesterday_titles = html_etree.xpath('/html/body/div[2]/div[1]/div[4]/table/tr/td[2]/div/a/text()')
     yesterday_links = html_etree.xpath('/html/body/div[2]/div[1]/div[4]/table/tr/td[2]/div/a/@href')
@@ -97,7 +97,7 @@ def get_top_list():
         cursor = mysql_connection.cursor()
         cursor.execute("INSERT INTO toplist VALUES( null, %s, %s, null, %s, %s)", (
             yesterday_titles[i], e2ex(yesterday_links[i]), datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            'yearly'))
+            'yesterday'))
         mysql_connection.commit()
     time.sleep(random.uniform(0.1, 0.3))
 
