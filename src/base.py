@@ -81,3 +81,4 @@ def get_top_list():
 # # TODO: use official API
 if __name__ == '__main__':
     get_top_list()
+    get_fav()
