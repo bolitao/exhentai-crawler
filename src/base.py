@@ -55,7 +55,6 @@ def get_fav():
         html_etree = etree.HTML(response)
         titles = html_etree.xpath('/html/body/div[2]/form/table[2]/tr/td[3]/a/div[1]/text()')
         links = html_etree.xpath('/html/body/div[2]/form/table[2]/tr/td[3]/a/@href')
-        # TODO: data storage
         for i in range(len(titles)):
             title = titles[i]
             link = links[i]
@@ -70,7 +69,6 @@ def e2ex(e_link):
     return str(e_link).replace('e-hentai', 'exhentai')
 
 
-# TODO: data_storage
 def get_top_list():
     url = "https://e-hentai.org/toplist.php"
     resp = session.get(url, headers={"User-Agent": user_agent}).text
@@ -102,7 +100,7 @@ def get_top_list():
     time.sleep(random.uniform(0.1, 0.3))
 
 
-# # TODO: use official API
+# TODO: use official API
 if __name__ == '__main__':
     get_top_list()
     get_fav()  # 仅用作 telegram bot 的话记得注释掉
