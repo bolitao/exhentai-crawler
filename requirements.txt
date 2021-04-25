@@ -5,7 +5,7 @@
 PyMySQL == 0.9.3
 
 # base.py: 9
-lxml == 4.4.2
+lxml == 4.6.3
 
 # base.py: 8
 requests == 2.22.0
